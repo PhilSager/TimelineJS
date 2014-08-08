@@ -39,6 +39,11 @@ in the future.
 
 Creating one is as easy as filling in a Google spreadsheet or as detailed as
 JSON.
+
+Note from Ohio History Connection: This particular fork of KnightLab's most
+awesome TimelineJS also allows for links to [CONTENTdm](http://www.contentdm.org/)
+and [Chronicling America](http://chroniclingamerica.loc.gov/), both of which provide
+web services to display their images.  
  
 ## Add it to your site
 
