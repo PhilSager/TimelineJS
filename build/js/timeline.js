@@ -220,7 +220,22 @@ if (typeof VMM == 'undefined') {
 			array:			[],
 			api_loaded:		false,
 			que:			[]
+		},
+		
+		contentdm: {
+			active:			false,
+			array:			[],
+			api_loaded:		false,
+			que:			[]
+		},
+		
+		chronam: {
+			active:			false,
+			array:			[],
+			api_loaded:		false,
+			que:			[]
 		}
+		
 		
 	}).init();
 	
@@ -2818,6 +2833,12 @@ if(typeof VMM != 'undefined' && typeof VMM.ExternalAPI == 'undefined') {
 			if (VMM.master_config.webthumb.active) {
 				VMM.ExternalAPI.webthumb.pushQue();
 			}
+			if (VMM.master_config.contentdm.active) {
+				VMM.ExternalAPI.contentdm.pushQue();
+			}
+			if (VMM.master_config.chronam.active) {
+				VMM.ExternalAPI.chronam.pushQue();
+			}
 		},
 		
 		twitter: {
@@ -4019,6 +4040,43 @@ if(typeof VMM != 'undefined' && typeof VMM.ExternalAPI == 'undefined') {
 			}
 		},
 		
+		contentdm: {
+			
+			get: function(m) {
+				return m.id.replace(/[\./]$/g, "");
+			},
+
+			isContentdmUrl: function(url) {
+				return url.match("CISOROOT");
+			},
+			
+			getContentdmLinkFromUrl: function(m) {
+				var dataLink = m.id.replace(/[\./]$/g, "");
+				var refId = dataLink.replace(/^.*CISOPTR=(.*?)&.+$/,"$1");
+				var refColl = dataLink.replace(/^.*CISOROOT=(.*?)&.+$/,"$1");
+				var refUrl = VMM.Timeline.Config.cdmhome + '/cdm/ref/collection/' + refColl + '/id/' + refId;
+				return refUrl;
+			}
+		},
+		
+		chronam: {
+
+			get: function(m) {
+				var imageLink = m.id.replace(/%2C/g, ",");
+				imageLink = imageLink.replace(/(^.*)\/$/, "$1.jpg");
+				return imageLink.replace(/^(.*)\/print(\/image_)\d.*?x\d.*?(_from.*$)/, "$1$2500x500$3");
+			},
+
+			isChronamUrl: function(url) {
+				return url.match("lccn");
+			},
+			
+			getChronamLinkFromUrl: function(m) {
+				return m.id.replace(/(^.*)\/print\/image_.*$/, "$1");	
+			}
+
+		},
+		
 		soundcloud: {
 			
 			get: function(m) {
@@ -4439,6 +4497,12 @@ if(typeof VMM != 'undefined' && typeof VMM.MediaElement == 'undefined') {
 				} else if (m.type	==	"instagram") {
 					mediaElem		=	"<div class='thumbnail thumb-instagram' id='" + uid + "_thumb'><img src='" + VMM.ExternalAPI.instagram.get(m, true) + "'></div>";
 					return mediaElem;
+				} else if (m.type	==	"contentdm") {
+					mediaElem		=	"<div class='thumbnail thumb-photo' id='" + uid + "_thumb'></div>";
+					return mediaElem;
+				} else if (m.type	==	"chronam") {
+					mediaElem		=	"<div class='thumbnail thumb-photo' id='" + uid + "_thumb'></div>";
+					return mediaElem;
 				} else if (m.type	==	"youtube") {
 					mediaElem		=	"<div class='thumbnail thumb-youtube' id='" + uid + "_thumb'></div>";
 					return mediaElem;
@@ -4532,6 +4596,12 @@ if(typeof VMM != 'undefined' && typeof VMM.MediaElement == 'undefined') {
 			// INSTAGRAM
 				} else if (m.type		==	"instagram") {
 					mediaElem			=	"<div class='media-image media-shadow'><a href='" + m.link + "' target='_blank'><img src='" + VMM.ExternalAPI.instagram.get(m) + "'></a></div>";
+			// CONTENTDM IMAGE
+				} else if (m.type		==	"contentdm") {
+					mediaElem			=	"<div class='media-image media-shadow'><a href='" + VMM.ExternalAPI.contentdm.getContentdmLinkFromUrl(m) + "' target='_blank'><img src='" +  VMM.ExternalAPI.contentdm.get(m) + "'></a></div>";
+			// CHRONICLING AMERICA IMAGE
+				} else if (m.type		==	"chronam") {
+					mediaElem			=	"<div class='media-image media-shadow'><a href='" + VMM.ExternalAPI.chronam.getChronamLinkFromUrl(m) + "' target='_blank'><img src='" +  VMM.ExternalAPI.chronam.get(m) + "'></a></div>";
 			// GOOGLE DOCS
 				} else if (m.type		==	"googledoc") {
 					mediaElem			=	"<div class='media-frame media-shadow doc' id='" + m.uid + "'>" + loading_messege + "</div>";
@@ -4743,6 +4813,14 @@ if(typeof VMM != 'undefined' && typeof VMM.MediaType == 'undefined') {
 			media.type = "instagram";
 			media.link = d;
 			media.id = VMM.ExternalAPI.instagram.getInstagramIdFromUrl(d)
+			success = Boolean(media.id);
+		} else if (VMM.ExternalAPI.contentdm.isContentdmUrl(d)) {
+			media.type = "contentdm";
+			media.id = d;
+			success = Boolean(media.id);
+		} else if (VMM.ExternalAPI.chronam.isChronamUrl(d)) {
+			media.type = "chronam";
+			media.id = d;
 			success = Boolean(media.id);
 		} else if (d.match(/jpg|jpeg|png|gif|svg|bmp/i) || 
 				   d.match("staticmap") || 
